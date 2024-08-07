@@ -8,16 +8,16 @@ load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
 
-# Initialize session state
+# session state
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
-# Placeholder function simulating ChatGPT interaction (replace with actual logic)
+#Code Main Logic
 def get_gemini_response(prompt, uploaded_image):
-    model=genai.GenerativeModel('gemini-1.5-flash') #gemini-pro
+    model=genai.GenerativeModel('gemini-1.5-flash')
     model2=genai.GenerativeModel('gemini-pro')
     if prompt !="": 
         response=model.generate_content([prompt,uploaded_image])
@@ -27,10 +27,10 @@ def get_gemini_response(prompt, uploaded_image):
          response=model.generate_content(uploaded_image)
     return response.text
 
-# Set page title and favicon
+# Page Title
 st.set_page_config(page_title="Chatbot with Login", page_icon=":robot:")
 
-# Function to add message to chat history
+# Function for add chat history
 def add_to_chat_history(sender, message):
     st.session_state.chat_history.append((sender, message))
 
@@ -42,16 +42,15 @@ def generate_bot_response(user_input):
 
 # Function to dynamically update bot response as if it's being typed out
 def update_bot_response(response):
-    bot_output = st.empty()
-    full_response = "Bot: " + response
-    for char_index in range(len(full_response)):
-        bot_output.text(full_response[:char_index+1])
-        time.sleep(0.05)  # Adjust the sleep time for typing speed
+    full_response = "Bot: " + response  
+    for char_index in full_response.split(" "):
+      yield char_index + " "
+      time.sleep(0.05)
 
 # Main chat interface
-st.title("Chatbot Interface")
+st.title("Hi! Any querys Let me Know I will Solve For You😉")
 
-# Add custom CSS styles
+#CSS
 custom_css = """
 <style>
 .gradient-text {
@@ -106,11 +105,11 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 if not st.session_state["logged_in"]:
-    # Image
+    # Interface image
     image = 'chatbot9103.jpg'
     st.image(image, caption='My Chat Bot', use_column_width=True)
 
-    # Login form in the top corner
+    # Login 
     with st.sidebar:
         st.title("Login")
         username = st.text_input("Username")
@@ -118,22 +117,18 @@ if not st.session_state["logged_in"]:
         login_button = st.button("Login")
 
         if login_button:
-            # Replace with your actual authentication logic
+            # Authentication
             if username == "Google" and password == "369":
                 st.session_state["logged_in"] = True
                 st.success("Login successful!")
-                # Clear login form after successful login
                 st.empty()
             else:
                 st.error("Invalid username or password")
 
 if st.session_state["logged_in"]:
-# Chat interface elements
-    # with st.form(key='chat_form'):
-
+# Chat interface 
       user_input = st.text_input("You:", "", help="Type your message here...",key="user_input")
       uploaded_file = st.file_uploader("choose an image ...",type=['jpeg','jpg','png'])
-       
       image=""
         
       if uploaded_file is not None:
@@ -144,19 +139,16 @@ if st.session_state["logged_in"]:
          user_response=user_input
          add_to_chat_history("You",user_response)
          response=get_gemini_response(prompt=user_input,uploaded_image=image)
-         st.subheader("Your Response is :: ")
-         st.write(response)
-        #  update_bot_response(response)
+         st.write_stream(update_bot_response(response))
         
-    # Display chat history in the sidebar
+    # Display chat history 
       st.sidebar.title("Chat History")
 
-    # Add logo to the history box
+    # Side Logo
       logo_image = 'pngtree.png'
       st.sidebar.image(logo_image, caption='''Hi! Am here to Save Records''', use_column_width=True)
 
       for index, (sender, message) in enumerate(st.session_state.chat_history, start=1):
         st.sidebar.text_area(f"{sender} ({index}):", message, height=len(message) // 2 + 1, max_chars=len(message), key=f"chat_history_{index}")
 
-# Gradient text effect for title
 st.markdown("<h1 class='gradient-text'>Chatbot Interface</h1>", unsafe_allow_html=True)
