@@ -1,0 +1,6 @@
+numpy
+streamlit
+google-generativeai
+python-dotenv
+Pillow
+IPython
